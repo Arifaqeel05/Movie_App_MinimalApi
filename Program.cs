@@ -30,6 +30,11 @@ builder.Services.AddCors(myCorsSetting =>
     });*/
 });
 
+builder.Services.AddOutputCache();
+
+//swagger service
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen();
 //service zone ends here
 
 var app = builder.Build();
@@ -37,7 +42,17 @@ var app = builder.Build();
 
 //Middleware zone starts here
 
+//as we need the swagger in the development environment only so we are checking the environment
+if(app.Environment.IsDevelopment())
+{
+    app.UseSwagger();
+    app.UseSwaggerUI();
+}
+
+
 app.UseCors(); //enable cors middleware with default policy.it will be applied globally 
+
+app.UseOutputCache();
 
 
 //in this endpoint,we are using other policy named "free".it will override the default policy
@@ -55,7 +70,8 @@ app.MapGet("/genre", () =>
         new Genre() { Id = 3, Name = "Drama" }
     };
     return genres;
-});
+}).CacheOutput(c => c.Expire(TimeSpan.FromSeconds(15)));// Cache the response for 15 seconds
+
 
 //Middleware zone ends here
 
