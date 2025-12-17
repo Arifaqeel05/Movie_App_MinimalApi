@@ -12,13 +12,22 @@ namespace Movie_App_MinimalApi.Repositories
         {
             connectionString = config.GetConnectionString("DefaultConnection")!;
         }
-        public Task<int> Create(Genre genre)
+        public async Task<int> Create(Genre genre)
         {
             using (var connection = new SqlConnection(connectionString))
             {
-                var q = connection.Query("SELECT 1").FirstOrDefault();
+                //put the query here
+                var query=@"INSERT INTO Genres (Name) VALUES (@Name); 
+                            SELECT SCOPE_IDENTITY();";//to get the last inserted id, SCOPE_IDENTITY() is used
+                
+
+                //send the query to the database
+                var resultfromquery=await connection.QuerySingleAsync<int>(query,genre); //here we will get i
+                genre.Id = resultfromquery;
+
+                return resultfromquery;
             }
-            return Task.FromResult(0);
+           
         }
     }
 }
