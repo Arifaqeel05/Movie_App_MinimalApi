@@ -1,4 +1,6 @@
-﻿using Movie_App_MinimalApi.Entity;
+﻿using Dapper;
+using Microsoft.Data.SqlClient;
+using Movie_App_MinimalApi.Entity;
 
 namespace Movie_App_MinimalApi.Repositories
 {
@@ -8,11 +10,15 @@ namespace Movie_App_MinimalApi.Repositories
 
         public GenreRepository(IConfiguration config)
         {
-             connectionString = config.GetConnectionString("DefaultConnection")!;
+            connectionString = config.GetConnectionString("DefaultConnection")!;
         }
         public Task<int> Create(Genre genre)
         {
-           
+            using (var connection = new SqlConnection(connectionString))
+            {
+                var q = connection.Query("SELECT 1").FirstOrDefault();
+            }
+            return Task.FromResult(0);
         }
     }
 }
