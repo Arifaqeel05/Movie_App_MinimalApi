@@ -6,5 +6,10 @@ namespace Movie_App_MinimalApi.Repositories
     {
         //any class that implements this interface must implement this method
         Task<int> Create(Genre genre);
+        //read
+        
+        Task<List<Genre>>GetAll();//task means its asynchronous, List will be returned after some time.
+                                  //Genre is the type of object in the list.
+        Task<Genre?>GetById(int id); //it will return a object of Genre 
     }
 }

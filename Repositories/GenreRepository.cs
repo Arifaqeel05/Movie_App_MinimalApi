@@ -29,5 +29,30 @@ namespace Movie_App_MinimalApi.Repositories
             }
            
         }
+
+        public async Task<List<Genre>> GetAll()
+        {
+            using (var connection = new SqlConnection(connectionString))
+            {
+                var query = "SELECT Id, Name FROM Genres";//this is SQL query simply.
+                var resultfromquery = await connection.QueryAsync<Genre>(query);//return result of Genre type and it is asynchronous.
+                return resultfromquery.ToList();
+            }
+        }
+
+        public async Task<Genre?> GetById(int id)
+        {
+            using (var connection = new SqlConnection(connectionString))
+            {
+                var query = "SELECT Id, Name FROM Genres WHERE Id = @Id";//parameterized query to prevent SQL injection
+                var parameter=new {Id=id };//anonymous object to hold the parameter value
+                var findedResult = await connection.QueryFirstOrDefaultAsync<Genre>(query, parameter);
+                //@Id is coming from client side and it is mapped to id parameter of this method.
+                //QueryFirstOrDefaultAsync will return null if no record is found.
+                //we can't pass simple id directly to the query because it may lead to SQL injection.so we pass anyonymous object.
+                
+                return findedResult; //object of Genre type will be returned corrosponding to the given id.
+            }
+        }
     }
 }

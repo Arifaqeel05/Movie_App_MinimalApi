@@ -59,26 +59,27 @@ app.UseCors(); //enable cors middleware with default policy.it will be applied g
 app.UseOutputCache();
 
 
-//in this endpoint,we are using other policy named "free".it will override the default policy
-app.MapGet("/", () => "Hello World!");
+//in this endpoint,we are using other policy named "free".it will override the default policY
 
 
 
 //here ,we are using default policy which is defined in the middleware
-app.MapGet("/genre", () =>
+app.MapGet("/getAllGenre", async(IGenreRepository genreRepository) =>
 {
-    var genres = new List<Genre>()
-    {
-        new Genre() { Id = 1, Name = "Action" },
-        new Genre() { Id = 2, Name = "Comedy" },
-        new Genre() { Id = 3, Name = "Drama" }
-    };
-    return genres;
+    return await genreRepository.GetAll();
 }).CacheOutput(c => c.Expire(TimeSpan.FromSeconds(15)));// Cache the response for 15 seconds
 
+app.MapGet("/getById/{id:int}", async (int id, IGenreRepository genreRepository) =>
+{
+    var genre = await genreRepository.GetById(id);
+    if (genre is null)
+    {
+        return Results.NotFound();
+    }
+    return Results.Ok(genre);
+});
 
-
-app.MapPost("/genre", async (Genre genre, IGenreRepository genreRepository) =>
+app.MapPost("/createGenre", async (Genre genre, IGenreRepository genreRepository) =>
 {
     await genreRepository.Create(genre);
     return TypedResults.Created($"/genre/{genre.Id}",genre);
