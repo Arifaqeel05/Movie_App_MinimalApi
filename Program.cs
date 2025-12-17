@@ -76,10 +76,12 @@ app.MapGet("/genre", () =>
     return genres;
 }).CacheOutput(c => c.Expire(TimeSpan.FromSeconds(15)));// Cache the response for 15 seconds
 
-app.MapPost("/genre ", async (Genre genre, IGenreRepository genreRepository) =>
+
+
+app.MapPost("/genre", async (Genre genre, IGenreRepository genreRepository) =>
 {
-    var result = await genreRepository.Create(genre);
-    return Results.Ok();
+    await genreRepository.Create(genre);
+    return TypedResults.Created($"/genre/{genre.Id}",genre);
 });
 
 
