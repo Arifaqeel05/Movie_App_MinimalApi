@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Cors;
 using Movie_App_MinimalApi.Entity;
+using Movie_App_MinimalApi.Repositories;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -31,6 +32,9 @@ builder.Services.AddCors(myCorsSetting =>
 });
 
 builder.Services.AddOutputCache();
+
+//dependency injection for repository
+builder.Services.AddScoped<IGenreRepository, GenreRepository>();
 
 //swagger service
 builder.Services.AddEndpointsApiExplorer();
@@ -71,6 +75,12 @@ app.MapGet("/genre", () =>
     };
     return genres;
 }).CacheOutput(c => c.Expire(TimeSpan.FromSeconds(15)));// Cache the response for 15 seconds
+
+app.MapPost("/genre ", async (Genre genre, IGenreRepository genreRepository) =>
+{
+    var result = await genreRepository.Create(genre);
+    return Results.Ok();
+});
 
 
 //Middleware zone ends here
