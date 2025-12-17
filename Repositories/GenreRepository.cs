@@ -34,7 +34,7 @@ namespace Movie_App_MinimalApi.Repositories
         {
             using (var connection = new SqlConnection(connectionString))
             {
-                var query = "SELECT Id, Name FROM Genres";//this is SQL query simply.
+                var query = "SELECT Id, Name FROM Genres ORDER BY NAME DESC";//this is SQL query simply.
                 var resultfromquery = await connection.QueryAsync<Genre>(query);//return result of Genre type and it is asynchronous.
                 return resultfromquery.ToList();
             }

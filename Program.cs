@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Cors;
+using Microsoft.AspNetCore.OutputCaching;
 using Movie_App_MinimalApi.Entity;
 using Movie_App_MinimalApi.Repositories;
 
@@ -64,10 +65,18 @@ app.UseOutputCache();
 
 
 //here ,we are using default policy which is defined in the middleware
+
+
+
+
 app.MapGet("/getAllGenre", async(IGenreRepository genreRepository) =>
 {
     return await genreRepository.GetAll();
-}).CacheOutput(c => c.Expire(TimeSpan.FromSeconds(15)));// Cache the response for 15 seconds
+}).CacheOutput(c => c.Expire(TimeSpan.FromSeconds(60)).Tag("genre-get"));// Cache the response for 15 seconds
+//tag is used to evict or clear the cache when data is changed.
+
+
+
 
 app.MapGet("/getById/{id:int}", async (int id, IGenreRepository genreRepository) =>
 {
@@ -79,11 +88,16 @@ app.MapGet("/getById/{id:int}", async (int id, IGenreRepository genreRepository)
     return Results.Ok(genre);
 });
 
-app.MapPost("/createGenre", async (Genre genre, IGenreRepository genreRepository) =>
+
+
+app.MapPost("/createGenre", async (Genre genre, IGenreRepository genreRepository, IOutputCacheStore cachecleanig) =>
 {
     await genreRepository.Create(genre);
+    await cachecleanig.EvictByTagAsync("genre-get", default);//evict the cache with tag "genre-get"
     return TypedResults.Created($"/genre/{genre.Id}",genre);
 });
+
+
 
 
 //Middleware zone ends here
