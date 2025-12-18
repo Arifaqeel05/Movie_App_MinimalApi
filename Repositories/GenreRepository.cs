@@ -37,7 +37,7 @@ namespace Movie_App_MinimalApi.Repositories
         {
             using (var connection = new SqlConnection(connectionString))
             {
-                var query = "SELECT Id, Name FROM Genres ORDER BY NAME DESC";//this is SQL query simply.
+                var query = "SELECT Id, Name FROM Genres ORDER BY NAME";//this is SQL query simply.
                 var resultfromquery = await connection.QueryAsync<Genre>(query);//return result of Genre type and it is asynchronous.
                 return resultfromquery.ToList();
             }
@@ -94,9 +94,20 @@ namespace Movie_App_MinimalApi.Repositories
             using (var connection = new SqlConnection(connectionString))
             {
                 var query = "UPDATE GENRES SET Name = @Name WHERE Id = @Id";
-                await connection.ExecuteAsync(query);//ExecuteAsync is used for commands that do not return any data.
+                var parameter = new { Name = genre.Name, Id = genre.Id };
+                await connection.ExecuteAsync(query,parameter);//ExecuteAsync is used for commands that do not return any data.
             }
 
+        }
+
+        public async Task Delete(int id)
+        {
+            using (var connection = new SqlConnection(connectionString))
+            {
+                var query = "DELETE FROM GENRES WHERE Id = @Id";
+                var parameter = new { Id = id };
+                await connection.ExecuteAsync(query,parameter);
+            }
         }
     }
 }
