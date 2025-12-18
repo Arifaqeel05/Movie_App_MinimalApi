@@ -7,11 +7,12 @@ namespace Movie_App_MinimalApi.Repositories
     public class GenreRepository : IGenreRepository
     {
         private readonly string? connectionString;
-
+        //constructor to get the connection string from appsettings.json.this is dependency injection.
         public GenreRepository(IConfiguration config)
         {
             connectionString = config.GetConnectionString("DefaultConnection")!;
         }
+
         public async Task<int> Create(Genre genre)
         {
             using (var connection = new SqlConnection(connectionString))
@@ -29,6 +30,8 @@ namespace Movie_App_MinimalApi.Repositories
             }
            
         }
+
+
 
         public async Task<List<Genre>> GetAll()
         {
@@ -53,6 +56,47 @@ namespace Movie_App_MinimalApi.Repositories
                 
                 return findedResult; //object of Genre type will be returned corrosponding to the given id.
             }
+        }
+
+        public async Task<bool> ExistGenre(int id)
+        {
+            // Create a SQL Server connection using the connection string
+            using (var connection = new SqlConnection(connectionString))
+            {
+                // This SQL checks if a record with the given Id exists in Genres table
+                // IF EXISTS → returns TRUE if at least one row is found
+                // If found → SELECT 1
+                // If not found → SELECT 0
+                var query = @"IF EXISTS (SELECT 1 FROM Genres WHERE Id = @Id)
+                        SELECT 1
+                      ELSE
+                        SELECT 0";
+
+                // Anonymous object to safely pass parameter to SQL
+                // @Id in SQL will get value of 'id'
+                var parameter = new { Id = id };
+
+                // QuerySingleAsync is used because:
+                // 1️⃣ SQL ALWAYS returns exactly ONE value (1 or 0)
+                // 2️⃣ We are expecting a single result
+                // 3️⃣ If SQL returns more or zero rows → it should throw an error
+                var existGenre = await connection.QuerySingleAsync<bool>(query, parameter);
+
+                // existGenre will be:
+                // true  → if SELECT 1
+                // false → if SELECT 0
+                return existGenre;
+            }
+        }
+
+        public async Task Update(Genre genre)
+        {
+            using (var connection = new SqlConnection(connectionString))
+            {
+                var query = "UPDATE GENRES SET Name = @Name WHERE Id = @Id";
+                await connection.ExecuteAsync(query);//ExecuteAsync is used for commands that do not return any data.
+            }
+
         }
     }
 }
