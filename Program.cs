@@ -98,6 +98,32 @@ app.MapPost("/createGenre", async (Genre genre, IGenreRepository genreRepository
 });
 
 
+app.MapPut("/updateGenre/{id:int}", async (int id,Genre genre, IGenreRepository genreRepository, IOutputCacheStore cachecleanig) =>
+{
+    var existingGenre = await genreRepository.GetById(id);
+    if (existingGenre is null)
+    {
+        return Results.NotFound();
+    }
+    await genreRepository.Update(genre);//here we  call the update method of repository and pass the genre object
+    await cachecleanig.EvictByTagAsync("genre-get", default);//evict the cache with tag "genre-get"
+    return Results.NoContent();//204 no content because we are not returning any content
+});
+
+app.MapDelete("/deleteGenre/{id:int}", async (int id, IGenreRepository genreRepository, IOutputCacheStore cachecleanig) =>
+{
+    var existingGenre = await genreRepository.GetById(id);
+if (existingGenre is null)
+    {
+        return Results.NotFound();
+    }
+    await genreRepository.Delete(id);
+    await cachecleanig.EvictByTagAsync("genre-get", default);//evict the cache with tag "genre-get"
+    return Results.NoContent();
+});
+
+
+
 
 
 //Middleware zone ends here

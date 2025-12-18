@@ -14,5 +14,7 @@ namespace Movie_App_MinimalApi.Repositories
 
         Task<bool>ExistGenre(int id);
         Task Update(Genre genre); //update method, no return type so void
+
+        Task Delete(int id);//delete method , no return type so void. just id is enough to delete the genre.
     }
 }
