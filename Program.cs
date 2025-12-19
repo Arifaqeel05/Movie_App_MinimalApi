@@ -66,10 +66,10 @@ app.UseOutputCache();
 
 //here ,we are using default policy which is defined in the middleware
 
+var genresEndpoint =app.MapGroup("/genres").WithTags("Genre Endpoints");//grouping the endpoints with common prefix /genres and adding tag for swagger documentation
 
 
-
-app.MapGet("/getAllGenre", async(IGenreRepository genreRepository) =>
+genresEndpoint.MapGet("/", async(IGenreRepository genreRepository) =>
 {
     return await genreRepository.GetAll();
 }).CacheOutput(c => c.Expire(TimeSpan.FromSeconds(60)).Tag("genre-get"));// Cache the response for 15 seconds
@@ -78,7 +78,7 @@ app.MapGet("/getAllGenre", async(IGenreRepository genreRepository) =>
 
 
 
-app.MapGet("/getById/{id:int}", async (int id, IGenreRepository genreRepository) =>
+genresEndpoint.MapGet("/{id:int}", async (int id, IGenreRepository genreRepository) =>
 {
     var genre = await genreRepository.GetById(id);
     if (genre is null)
@@ -90,15 +90,15 @@ app.MapGet("/getById/{id:int}", async (int id, IGenreRepository genreRepository)
 
 
 
-app.MapPost("/createGenre", async (Genre genre, IGenreRepository genreRepository, IOutputCacheStore cachecleanig) =>
+genresEndpoint.MapPost("/createGenre", async (Genre genre, IGenreRepository genreRepository, IOutputCacheStore cachecleanig) =>
 {
     await genreRepository.Create(genre);
     await cachecleanig.EvictByTagAsync("genre-get", default);//evict the cache with tag "genre-get"
-    return TypedResults.Created($"/genre/{genre.Id}",genre);
+    return Results.Created($"/genre/{genre.Id}",genre);
 });
 
 
-app.MapPut("/updateGenre/{id:int}", async (int id,Genre genre, IGenreRepository genreRepository, IOutputCacheStore cachecleanig) =>
+genresEndpoint.MapPut("/updateGenre/{id:int}", async (int id,Genre genre, IGenreRepository genreRepository, IOutputCacheStore cachecleanig) =>
 {
     var existingGenre = await genreRepository.GetById(id);
     if (existingGenre is null)
@@ -110,10 +110,12 @@ app.MapPut("/updateGenre/{id:int}", async (int id,Genre genre, IGenreRepository 
     return Results.NoContent();//204 no content because we are not returning any content
 });
 
-app.MapDelete("/deleteGenre/{id:int}", async (int id, IGenreRepository genreRepository, IOutputCacheStore cachecleanig) =>
+genresEndpoint.MapDelete("/deleteGenre/{id:int}", async (int id, IGenreRepository genreRepository, IOutputCacheStore cachecleanig) =>
 {
-    var existingGenre = await genreRepository.GetById(id);
-if (existingGenre is null)
+    //var existingGenre = await genreRepository.GetById(id);
+
+    var existingGenre=await genreRepository.ExistGenre(id);
+    if (!existingGenre)
     {
         return Results.NotFound();
     }
