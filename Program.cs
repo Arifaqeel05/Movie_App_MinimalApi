@@ -58,19 +58,10 @@ if(app.Environment.IsDevelopment())
 
 
 app.UseCors(); //enable cors middleware with default policy.it will be applied globally 
-
 app.UseOutputCache();
-
-
-//in this endpoint,we are using other policy named "free".it will override the default policY
-
-
-
-//here ,we are using default policy which is defined in the middleware
-
 app.MapGroup("/genres")
-    .MapGenres()//this is the same method we have created in GenresEndpoints class.this is extension method because we are extending the functionality of RouteGroupBuilder class.
-    .WithTags("Genre Endpoints");//grouping the endpoints with common prefix /genres and adding tag for swagger documentation
+    .MapGenres();//this is the same method we have created in GenresEndpoints class.this is extension method because we are extending the functionality of RouteGroupBuilder class.
+    //grouping the endpoints with common prefix /genres and adding tag for swagger documentation
 
 
 //Middleware zone ends here

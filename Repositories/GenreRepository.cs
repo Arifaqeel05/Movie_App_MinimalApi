@@ -47,7 +47,8 @@ namespace Movie_App_MinimalApi.Repositories
         {
             using (var connection = new SqlConnection(connectionString))
             {
-                var query = "SELECT Id, Name FROM Genres WHERE Id = @Id";//parameterized query to prevent SQL injection
+                var query = "SELECT Id, Name FROM Genres WHERE Id = @Id";
+                /*parameterized query to prevent SQL injection*/
                 var parameter=new {Id=id };//anonymous object to hold the parameter value
                 var findedResult = await connection.QueryFirstOrDefaultAsync<Genre>(query, parameter);
                 //@Id is coming from client side and it is mapped to id parameter of this method.
