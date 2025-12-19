@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Cors;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.OutputCaching;
 using Movie_App_MinimalApi.Entity;
 using Movie_App_MinimalApi.Repositories;
@@ -69,10 +70,8 @@ app.UseOutputCache();
 var genresEndpoint =app.MapGroup("/genres").WithTags("Genre Endpoints");//grouping the endpoints with common prefix /genres and adding tag for swagger documentation
 
 
-genresEndpoint.MapGet("/", async(IGenreRepository genreRepository) =>
-{
-    return await genreRepository.GetAll();
-}).CacheOutput(c => c.Expire(TimeSpan.FromSeconds(60)).Tag("genre-get"));// Cache the response for 15 seconds
+genresEndpoint.MapGet("/", GetAll)
+    .CacheOutput(c => c.Expire(TimeSpan.FromSeconds(60)).Tag("genre-get"));// Cache the response for 15 seconds
 //tag is used to evict or clear the cache when data is changed.
 
 
@@ -134,3 +133,9 @@ app.Run();
 
 
 //so in the development environment, we allowed all the origins to access our api
+
+static async Task<Ok<List<Genre>>> GetAll (IGenreRepository genreRepository)
+{
+    var genres = await genreRepository.GetAll();
+    return TypedResults.Ok(genres);
+}
