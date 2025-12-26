@@ -95,13 +95,20 @@ namespace Movie_App_MinimalApi.Endpoints
         }
 
 
-        static async Task<Results<NoContent, NotFound>> Update(int id, Genre genre, IGenreRepository genreRepository, IOutputCacheStore cachecleanig)
+        static async Task<Results<NoContent, NotFound>> Update(int id, CreateUpdateGenreDTO creatupdaetgenreDTO, IGenreRepository genreRepository, IOutputCacheStore cachecleanig)
         {
             var existingGenre = await genreRepository.GetById(id);
             if (existingGenre is null)
             {
                 return TypedResults.NotFound();
             }
+
+            
+            var genre = new Genre
+            {
+                Id = id, //THIS will come from the route parameter and no need to set from DTO
+                Name = creatupdaetgenreDTO.Name //this will come from the DTO
+            };
             await genreRepository.Update(genre);//here we  call the update method of repository and pass the genre object
             await cachecleanig.EvictByTagAsync("genre-get", default);//evict the cache with tag "genre-get"
             return TypedResults.NoContent();//204 no content because we are not returning any content
