@@ -63,6 +63,7 @@ app.MapGroup("/genres")
     .MapGenres();//this is the same method we have created in GenresEndpoints class.this is extension method because we are extending the functionality of RouteGroupBuilder class.
     //grouping the endpoints with common prefix /genres and adding tag for swagger documentation
 
+app.MapGet("/", () => "Movie section");
 
 //Middleware zone ends here
 
