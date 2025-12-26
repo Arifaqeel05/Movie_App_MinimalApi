@@ -1,6 +1,8 @@
 ﻿using Dapper;
 using Microsoft.Data.SqlClient;
 using Movie_App_MinimalApi.Entity;
+using System.Collections.Generic;
+using System.Data;
 
 namespace Movie_App_MinimalApi.Repositories
 {
@@ -17,13 +19,17 @@ namespace Movie_App_MinimalApi.Repositories
         {
             using (var connection = new SqlConnection(connectionString))
             {
-                //put the query here
+                /*put the query here
                 var query=@"INSERT INTO Genres (Name) VALUES (@Name); 
                             SELECT SCOPE_IDENTITY();";//to get the last inserted id, SCOPE_IDENTITY() is used
-                
+                */
+
+                var query="Genre_Create";
+                var parameter=new {Name=genre.Name};//anonymous object to hold the parameter value
+
 
                 //send the query to the database
-                var resultfromquery=await connection.QuerySingleAsync<int>(query,genre); //here we will get i
+                var resultfromquery=await connection.QuerySingleAsync<int>(query,parameter, commandType:CommandType.StoredProcedure); //return type is int because we are returning the id of the inserted genre.
                 genre.Id = resultfromquery;
 
                 return resultfromquery;
@@ -37,8 +43,13 @@ namespace Movie_App_MinimalApi.Repositories
         {
             using (var connection = new SqlConnection(connectionString))
             {
-                var query = "SELECT Id, Name FROM Genres ORDER BY NAME";//this is SQL query simply.
-                var resultfromquery = await connection.QueryAsync<Genre>(query);//return result of Genre type and it is asynchronous.
+                //var query = "SELECT Id, Name FROM Genres ORDER BY NAME";//this is SQL query simply.
+                
+                var query = "Genre_GetAll";//here we used stored procedure, no need to write select statement in c#.
+                
+                var resultfromquery = await connection.QueryAsync<Genre>(query, commandType:CommandType.StoredProcedure);
+                
+                //return result of Genre type and it is asynchronous.
                 return resultfromquery.ToList();
             }
         }
@@ -47,10 +58,11 @@ namespace Movie_App_MinimalApi.Repositories
         {
             using (var connection = new SqlConnection(connectionString))
             {
-                var query = "SELECT Id, Name FROM Genres WHERE Id = @Id";
+                var query = "Genre_GetByID";
                 /*parameterized query to prevent SQL injection*/
                 var parameter=new {Id=id };//anonymous object to hold the parameter value
-                var findedResult = await connection.QueryFirstOrDefaultAsync<Genre>(query, parameter);
+                var findedResult = await connection.QueryFirstOrDefaultAsync<Genre>(query, parameter, 
+                                                                        commandType:CommandType.StoredProcedure);
                 //@Id is coming from client side and it is mapped to id parameter of this method.
                 //QueryFirstOrDefaultAsync will return null if no record is found.
                 //we can't pass simple id directly to the query because it may lead to SQL injection.so we pass anyonymous object.
@@ -68,10 +80,7 @@ namespace Movie_App_MinimalApi.Repositories
                 // IF EXISTS → returns TRUE if at least one row is found
                 // If found → SELECT 1
                 // If not found → SELECT 0
-                var query = @"IF EXISTS (SELECT 1 FROM Genres WHERE Id = @Id)
-                        SELECT 1
-                      ELSE
-                        SELECT 0";
+                var query = "Genre_Exist";
 
                 // Anonymous object to safely pass parameter to SQL
                 // @Id in SQL will get value of 'id'
@@ -81,7 +90,7 @@ namespace Movie_App_MinimalApi.Repositories
                 // 1️⃣ SQL ALWAYS returns exactly ONE value (1 or 0)
                 // 2️⃣ We are expecting a single result
                 // 3️⃣ If SQL returns more or zero rows → it should throw an error
-                var existGenre = await connection.QuerySingleAsync<bool>(query, parameter);
+                var existGenre = await connection.QuerySingleAsync<bool>(query, parameter, commandType: CommandType.StoredProcedure);
 
                 // existGenre will be:
                 // true  → if SELECT 1
@@ -94,9 +103,9 @@ namespace Movie_App_MinimalApi.Repositories
         {
             using (var connection = new SqlConnection(connectionString))
             {
-                var query = "UPDATE GENRES SET Name = @Name WHERE Id = @Id";
+                var query = "Genre_Update";
                 var parameter = new { Name = genre.Name, Id = genre.Id };
-                await connection.ExecuteAsync(query,parameter);//ExecuteAsync is used for commands that do not return any data.
+                await connection.ExecuteAsync(query,parameter, commandType: CommandType.StoredProcedure);//ExecuteAsync is used for commands that do not return any data.
             }
 
         }
@@ -105,9 +114,9 @@ namespace Movie_App_MinimalApi.Repositories
         {
             using (var connection = new SqlConnection(connectionString))
             {
-                var query = "DELETE FROM GENRES WHERE Id = @Id";
+                var query = "Genre_Delete";
                 var parameter = new { Id = id };
-                await connection.ExecuteAsync(query,parameter);
+                await connection.ExecuteAsync(query,parameter, commandType:CommandType.StoredProcedure);
             }
         }
     }
