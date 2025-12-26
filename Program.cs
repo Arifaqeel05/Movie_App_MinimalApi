@@ -1,8 +1,10 @@
 using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.OutputCaching;
+using Microsoft.Extensions.DependencyInjection;
 using Movie_App_MinimalApi.Endpoints;
 using Movie_App_MinimalApi.Entity;
+using AutoMapper;
 using Movie_App_MinimalApi.Repositories;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -35,7 +37,7 @@ builder.Services.AddCors(myCorsSetting =>
 });
 
 builder.Services.AddOutputCache();
-
+builder.Services.AddAutoMapper(typeof(Program)); //automapper service
 //dependency injection for repository
 builder.Services.AddScoped<IGenreRepository, GenreRepository>();
 
