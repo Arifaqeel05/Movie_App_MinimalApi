@@ -1,10 +1,12 @@
+using AutoMapper;
 using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.OutputCaching;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
+using Movie_App_MinimalApi;
 using Movie_App_MinimalApi.Endpoints;
 using Movie_App_MinimalApi.Entity;
-using AutoMapper;
 using Movie_App_MinimalApi.Repositories;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -39,7 +41,8 @@ builder.Services.AddCors(myCorsSetting =>
 builder.Services.AddOutputCache();
 builder.Services.AddAutoMapper(typeof(Program)); //automapper service
 //dependency injection for repository
-builder.Services.AddScoped<IGenreRepository, GenreRepository>();
+builder.Services.AddScoped<IGenreRepository, GenreRepository>(); //providing implementation of IGenreRepository interface with GenreRepository class
+builder.Services.AddScoped<IActorRepository, ActorRepository>();//dependency injection for ActorRepository
 
 //swagger service
 builder.Services.AddEndpointsApiExplorer();
@@ -64,6 +67,7 @@ app.UseOutputCache();
 app.MapGroup("/genres")
     .MapGenres();//this is the same method we have created in GenresEndpoints class.this is extension method because we are extending the functionality of RouteGroupBuilder class.
     //grouping the endpoints with common prefix /genres and adding tag for swagger documentation
+app.MapGroup("/actors").MapActors();//mapping actor endpoints with /actors prefix
 
 app.MapGet("/", () => "Movie section");
 

@@ -11,6 +11,11 @@ namespace Movie_App_MinimalApi.Utilities
         {
             CreateMap<Genre, GenreDTO>();
             CreateMap<CreateUpdateGenreDTO, Genre>();
+            CreateMap<Actor, ActorDTO>();
+            CreateMap<CreateUpdateActorDTO, Actor>()
+                .ForMember(p=>p.ActorPic,options=>options.Ignore());
         }
     }
 }
+
+//WE WANT automapper to map all the properties from createupdateactordto except the picture file

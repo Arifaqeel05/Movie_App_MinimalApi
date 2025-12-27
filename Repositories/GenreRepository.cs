@@ -10,14 +10,14 @@ namespace Movie_App_MinimalApi.Repositories
     {
         private readonly string? connectionString;
         //constructor to get the connection string from appsettings.json.this is dependency injection.
-        public GenreRepository(IConfiguration config)
+        public GenreRepository(IConfiguration config)//
         {
             connectionString = config.GetConnectionString("DefaultConnection")!;
         }
 
         public async Task<int> Create(Genre genre)
         {
-            using (var connection = new SqlConnection(connectionString))
+            using (var connection = new SqlConnection(connectionString))//establishing connection with database
             {
                 /*put the query here
                 var query=@"INSERT INTO Genres (Name) VALUES (@Name); 
