@@ -8,6 +8,7 @@ using Movie_App_MinimalApi;
 using Movie_App_MinimalApi.Endpoints;
 using Movie_App_MinimalApi.Entity;
 using Movie_App_MinimalApi.Repositories;
+using Movie_App_MinimalApi.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -44,6 +45,13 @@ builder.Services.AddAutoMapper(typeof(Program)); //automapper service
 builder.Services.AddScoped<IGenreRepository, GenreRepository>(); //providing implementation of IGenreRepository interface with GenreRepository class
 builder.Services.AddScoped<IActorRepository, ActorRepository>();//dependency injection for ActorRepository
 
+
+//config azure service for image
+builder.Services.AddTransient<IFileStorage, AzureFileStorage>();
+//local file storage service
+builder.Services.AddTransient<IFileStorage, LocalFileStorage>();
+builder.Services.AddHttpContextAccessor();//to access httpcontext in localfilestorage class
+
 //swagger service
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
@@ -55,18 +63,19 @@ var app = builder.Build();
 //Middleware zone starts here
 
 //as we need the swagger in the development environment only so we are checking the environment
-if(app.Environment.IsDevelopment())
+if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
     app.UseSwaggerUI();
 }
 
+app.UseStaticFiles();
 
 app.UseCors(); //enable cors middleware with default policy.it will be applied globally 
 app.UseOutputCache();
 app.MapGroup("/genres")
     .MapGenres();//this is the same method we have created in GenresEndpoints class.this is extension method because we are extending the functionality of RouteGroupBuilder class.
-    //grouping the endpoints with common prefix /genres and adding tag for swagger documentation
+                 //grouping the endpoints with common prefix /genres and adding tag for swagger documentation
 app.MapGroup("/actors").MapActors();//mapping actor endpoints with /actors prefix
 
 app.MapGet("/", () => "Movie section");

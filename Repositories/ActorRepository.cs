@@ -26,7 +26,7 @@ namespace Movie_App_MinimalApi.Repositories
                     ActorPic = actor.ActorPic
                 };
 
-                var id = await connection.QuerySingleAsync(query, parameters,commandType:CommandType.StoredProcedure);
+                var id = await connection.QuerySingleAsync<int>(query, parameters, commandType: CommandType.StoredProcedure);
                 actor.Id = id;//set the id of the actor object ,it will come from database.
                 return id;
 
@@ -38,7 +38,7 @@ namespace Movie_App_MinimalApi.Repositories
             using (var connection = new SqlConnection(connectionString))
             {
                 var query = "Actors_GetAll";
-                var actors = await connection.QueryAsync<Actor>(query, commandType:CommandType.StoredProcedure);
+                var actors = await connection.QueryAsync<Actor>(query, commandType: CommandType.StoredProcedure);
                 return actors.ToList();
             }
         }
@@ -47,10 +47,7 @@ namespace Movie_App_MinimalApi.Repositories
         {
             using (var connection = new SqlConnection(connectionString))
             {
-                var query = @"IF EXISTS(SELECT 1 FROM ACTORS WHERE Id = @Id)
-                                SELECT 1
-                              ELSE
-                                SELECT 0";
+                var query = @"Actors_Exist";
                 var parameter = new { Id = id };
                 var exists = await connection.ExecuteScalarAsync<bool>(query, parameter);
                 return exists;
@@ -63,7 +60,7 @@ namespace Movie_App_MinimalApi.Repositories
             {
                 var query = "Actors_GetById";
                 var parameter = new { Id = id };
-                var actor = await connection.QuerySingleOrDefaultAsync<Actor>(query, parameter, commandType:CommandType.StoredProcedure);
+                var actor = await connection.QuerySingleOrDefaultAsync<Actor>(query, parameter, commandType: CommandType.StoredProcedure);
                 return actor;
             }
         }
@@ -80,17 +77,16 @@ namespace Movie_App_MinimalApi.Repositories
                     DateOfBirth = actor.DateOfBirth,
                     ActorPic = actor.ActorPic
                 };
-                await connection.ExecuteAsync(query, parameters, commandType:CommandType.StoredProcedure);
+                await connection.ExecuteAsync(query, parameters, commandType: CommandType.StoredProcedure);
             }
         }
         public async Task Delete(int id)
         {
             using (var connection = new SqlConnection(connectionString))
             {
-                var query = @"DELETE FROM Actors
-                            WHERE Id=@Id";
+                var query = "Actors_Delete";
                 var parameter = new { Id = id };
-                await connection.ExecuteAsync(query, parameter);
+                await connection.ExecuteAsync(query, parameter, commandType: CommandType.StoredProcedure);
             }
         }
     }

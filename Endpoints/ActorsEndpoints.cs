@@ -11,10 +11,13 @@ namespace Movie_App_MinimalApi.Endpoints
 {
     public static class ActorsEndpoints
     {
-        private readonly static string containerName = "actors-pics";//folder name to store actor pictures
+        private readonly static string containerName = "actors-pics";
+        /*folder name to store actor pictures, we will see this name inside the azure container ,
+          this will act as a parent foloder of storing actor pictures
+        */
         public static RouteGroupBuilder MapActors(this RouteGroupBuilder group)
         {
-           
+
             //group.MapGet("/", GetAll)
             //.CacheOutput(c => c.Expire(TimeSpan.FromSeconds(60)).Tag("actors-get"));
             //group.MapGet("/{id:int}", GetById);
@@ -33,10 +36,10 @@ namespace Movie_App_MinimalApi.Endpoints
             //THIS WILL CREATE A NEW Actor BASED ON THE DATA RECEIVED FROM THE CLIENT IN THE DTO and map to actor entity
             var actor = mapper.Map<Actor>(creatupdaetactorDTO);
 
-            if(creatupdaetactorDTO.ActorPic is not null)
+            if (creatupdaetactorDTO.ActorPic is not null)
             {
                 var url = await fileStorage.Store(containerName, creatupdaetactorDTO.ActorPic);
-                actor.ActorPic = url; 
+                actor.ActorPic = url;
                 //set the ActorPic property of actor entity to the url returned by file storage service.url will be saved in the database
             }
 
@@ -49,6 +52,6 @@ namespace Movie_App_MinimalApi.Endpoints
             return TypedResults.Created($"/actor/{actor.Id}", actorDTO);//return 201 created response with location header and genreDTO in the response body
         }
 
-        
+
     }
 }
