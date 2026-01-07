@@ -8,6 +8,7 @@ namespace Movie_App_MinimalApi.Repositories
         Task Delete(int id);
         Task<List<Actor>> GetAll();
         Task<Actor?> GetById(int id);
+        Task<List<Actor>> GetByName(string name);
         Task<bool> IsExist(int id);
         Task Update(Actor actor);
     }

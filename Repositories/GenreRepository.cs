@@ -119,5 +119,16 @@ namespace Movie_App_MinimalApi.Repositories
                 await connection.ExecuteAsync(query,parameter, commandType:CommandType.StoredProcedure);
             }
         }
+
+        public async Task<List<Genre>> GetByName(string name)
+        {
+            using (var connection = new SqlConnection(connectionString))//establishing connection with database
+            {
+                var query = "Genres_GetByName";//stored procedure name
+                var parameter = new { Name = name };//parameter object
+                var genres = await connection.QueryAsync<Genre>(query, parameter, commandType: CommandType.StoredProcedure);
+                return genres.ToList();
+            }
+        }
     }
 }

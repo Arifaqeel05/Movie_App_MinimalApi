@@ -28,7 +28,7 @@ namespace Movie_App_MinimalApi.Endpoints
             return Results.Ok(genre);
             });*/
 
-
+            group.MapGet("/searchByName/{name}", GetByName);
 
             group.MapPost("/createGenre", Create);
             /*async (Genre genre, IGenreRepository genreRepository, IOutputCacheStore cachecleanig) =>
@@ -169,6 +169,13 @@ namespace Movie_App_MinimalApi.Endpoints
             await genreRepository.Update(genre);//here we  call the update method of repository and pass the genre object
             await cachecleanig.EvictByTagAsync("genre-get", default);//evict the cache with tag "genre-get"
             return TypedResults.NoContent();//204 no content because we are not returning any content
+        }
+
+        static async Task<Ok<List<GenreDTO>>>GetByName(string name, IGenreRepository genreRepository, IMapper mapper)
+        {
+            var genres = await genreRepository.GetByName(name);//fetch genres by name from database
+            var genresDTO = mapper.Map<List<GenreDTO>>(genres);//map the list of genre entities to list of genreDTOs
+            return TypedResults.Ok(genresDTO);//return 200 ok response with list of genres in the response body
         }
 
         static async Task<Results<NotFound, NoContent>> Delete(int id, IGenreRepository genreRepository, 
