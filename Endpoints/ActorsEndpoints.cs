@@ -24,8 +24,8 @@ namespace Movie_App_MinimalApi.Endpoints
             group.MapGet("/searchByName/{name}", GetByName);
                 
             group.MapPost("/createActor", Create).DisableAntiforgery();//disable antiforgery for testing in postman
-            //group.MapPut("/updateActor/{id:int}", Update);
-            //group.MapDelete("/deleteActor/{id:int}", Delete);
+            group.MapPut("/updateActor/{id:int}", Update).DisableAntiforgery(); ;
+            group.MapDelete("/deleteActor/{id:int}", Delete);
             return group;
         }
 
@@ -88,6 +88,48 @@ namespace Movie_App_MinimalApi.Endpoints
             return TypedResults.Created($"/actor/{actor.Id}", actorDTO);//return 201 created response with location header and genreDTO in the response body
         }
 
+        static async Task<Results<NotFound,NoContent >> Update(int id,
+            [FromForm] CreateUpdateActorDTO createUpdateActorDTO, IActorRepository actorRepository,
+            IFileStorage fileStorage, IOutputCacheStore cachecleanig, IMapper mapper
+            )
+        {
+            var actotDB= await actorRepository.GetById(id);//fetch actor by id from database
+            if (actotDB is null)
+            {
+                return TypedResults.NotFound();//return 404 not found if actor is not found
+            }
+            var actorForUpdate=mapper.Map<Actor>(createUpdateActorDTO);//map the existing actor entity to a new actor entity for update
+            actorForUpdate.Id = id;
+            actorForUpdate.ActorPic = actotDB.ActorPic;//set the existing actor picture url to the new actor entity
 
-    }
+            if(createUpdateActorDTO.ActorPic is not null)
+            {
+                //if new picture is provided, then we need to update the picture
+                var url = await fileStorage.Edit(containerName, createUpdateActorDTO.ActorPic, actorForUpdate.ActorPic);      
+                actorForUpdate.ActorPic = url;
+                //set the ActorPic property of actor entity to the url returned by file storage service.url will be saved in the database
+            }
+            await actorRepository.Update(actorForUpdate);//update the actor in the database
+            await cachecleanig.EvictByTagAsync("actors-get", default);//evict the cache with tag "genre-get"
+            return TypedResults.NoContent();//return 204 no content response
+        }
+
+        static async Task<Results<NotFound, NoContent>> Delete(int id, IActorRepository actorRepository,
+            IFileStorage fileStorage, IOutputCacheStore cachecleanig)
+        {
+            var actor = await actorRepository.GetById(id);//fetch actor by id from database
+            if (actor is null)
+            {
+                return TypedResults.NotFound();//return 404 not found if actor is not found
+            }
+
+            await actorRepository.Delete(id);//delete the actor from database
+            await fileStorage.Delete(actor.ActorPic, containerName);//delete the actor picture from file storage
+            await cachecleanig.EvictByTagAsync("actors-get", default);//evict the cache with tag "genre-get"
+            return TypedResults.NoContent();//return 204 no content response
+
+
+        }
+
+        }
 }
