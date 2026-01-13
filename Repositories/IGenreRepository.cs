@@ -1,4 +1,5 @@
-﻿using Movie_App_MinimalApi.Entity;
+﻿using Movie_App_MinimalApi.DTOs;
+using Movie_App_MinimalApi.Entity;
 
 namespace Movie_App_MinimalApi.Repositories
 {
@@ -8,7 +9,7 @@ namespace Movie_App_MinimalApi.Repositories
         Task<int> Create(Genre genre);
         //read
         
-        Task<List<Genre>>GetAll();//task means its asynchronous, List will be returned after some time.
+        Task<List<Genre>>GetAll(PaginationDTO pagination);//task means its asynchronous, List will be returned after some time.
                                   //Genre is the type of object in the list.
         Task<Genre?>GetById(int id); //it will return a object of Genre 
 

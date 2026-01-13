@@ -72,9 +72,11 @@ namespace Movie_App_MinimalApi.Endpoints
         }
 
         /*--------------------------------GET ALL START-----------------------------------------------*/
-        static async Task<Ok<List<GenreDTO>>> GetAll(IGenreRepository genreRepository, IMapper mapper)
+        static async Task<Ok<List<GenreDTO>>> GetAll(IGenreRepository genreRepository, IMapper mapper, 
+            int page = 1, int recordsPerPage = 10)
         {
-            var genres = await genreRepository.GetAll();
+            var pagination = new PaginationDTO { Page = page, RecordsPerPage = recordsPerPage };
+            var genres = await genreRepository.GetAll(pagination);
 
             var genresDTO = mapper.Map<List<GenreDTO>>(genres);//please map the "genres" list to "genresDTO" list
         /*

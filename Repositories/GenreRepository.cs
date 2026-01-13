@@ -1,5 +1,7 @@
 ﻿using Dapper;
+using Microsoft.AspNetCore.Http;
 using Microsoft.Data.SqlClient;
+using Movie_App_MinimalApi.DTOs;
 using Movie_App_MinimalApi.Entity;
 using System.Collections.Generic;
 using System.Data;
@@ -9,10 +11,12 @@ namespace Movie_App_MinimalApi.Repositories
     public class GenreRepository : IGenreRepository
     {
         private readonly string? connectionString;
+        private readonly HttpContext httpContext;
         //constructor to get the connection string from appsettings.json.this is dependency injection.
-        public GenreRepository(IConfiguration config)//
+        public GenreRepository(IConfiguration config, IHttpContextAccessor httpContextAccessor)
         {
             connectionString = config.GetConnectionString("DefaultConnection")!;
+            httpContext = httpContextAccessor.HttpContext!;
         }
 
         public async Task<int> Create(Genre genre)
@@ -39,7 +43,7 @@ namespace Movie_App_MinimalApi.Repositories
 
 
 
-        public async Task<List<Genre>> GetAll()
+        public async Task<List<Genre>> GetAll(PaginationDTO pagination)
         {
             using (var connection = new SqlConnection(connectionString))
             {
@@ -47,8 +51,13 @@ namespace Movie_App_MinimalApi.Repositories
                 
                 var query = "Genre_GetAll";//here we used stored procedure, no need to write select statement in c#.
                 
-                var resultfromquery = await connection.QueryAsync<Genre>(query, commandType:CommandType.StoredProcedure);
-                
+                var resultfromquery = await connection.QueryAsync<Genre>(query,
+                    new { pagination.Page, pagination.RecordsPerPage },
+                     commandType:CommandType.StoredProcedure);
+                var genreCount = await connection.QuerySingleAsync<int>("Genre_Count", commandType: CommandType.StoredProcedure);
+
+                httpContext.Response.Headers.Append("TotalAmountOfGenres", genreCount.ToString());
+
                 //return result of Genre type and it is asynchronous.
                 return resultfromquery.ToList();
             }

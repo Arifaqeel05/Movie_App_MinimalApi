@@ -45,7 +45,7 @@ namespace Movie_App_MinimalApi.Repositories
                 var actors = await connection.QueryAsync<Actor>(query,
                     new { pagination.Page, pagination.RecordsPerPage },
                     commandType: CommandType.StoredProcedure);
-                    var actorsCount= await connection.QueryAsync<int>("Actors_Count",commandType: CommandType.StoredProcedure);
+                    var actorsCount= await connection.QuerySingleAsync<int>("Actors_Count",commandType: CommandType.StoredProcedure);
                 //we will use the header of http response to send total count of records to client
 
                 httpContext.Response.Headers.Append("TotalAmountOfActors", actorsCount.ToString());
