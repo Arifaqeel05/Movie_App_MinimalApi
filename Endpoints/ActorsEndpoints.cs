@@ -30,9 +30,15 @@ namespace Movie_App_MinimalApi.Endpoints
         }
 
 
-        static async Task<Ok<List<ActorDTO>>>GetAll(IActorRepository actorRepository, IMapper mapper)
+        static async Task<Ok<List<ActorDTO>>>GetAll(IActorRepository actorRepository, 
+            IMapper mapper, int page=1, int recordsPerPage=10) //we didn't use PaginationDTO here to keep it simple
         {
-            var actors = await actorRepository.GetAll();//fetch all actors from database
+            //create instance of paginationDTO and now set its properties
+            var pagination = new PaginationDTO{ Page = page, RecordsPerPage = recordsPerPage };
+
+            //now pass pagination to repository method so it can fetch number of records based on pagination
+
+            var actors = await actorRepository.GetAll(pagination);//fetch all actors from database
             var actorsDTO = mapper.Map<List<ActorDTO>>(actors);//map the list of actor entities to list of actorDTOs
             return TypedResults.Ok(actorsDTO);//return 200 ok response with list of actorDTOs in the response body
         }

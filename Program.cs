@@ -49,9 +49,9 @@ builder.Services.AddScoped<IActorRepository, ActorRepository>();//dependency inj
 //config azure service for image
 builder.Services.AddTransient<IFileStorage, AzureFileStorage>();
 /*local file storage service---we use azure so comment this
-builder.Services.AddTransient<IFileStorage, LocalFileStorage>();
-builder.Services.AddHttpContextAccessor();//to access httpcontext in localfilestorage class
-*/
+builder.Services.AddTransient<IFileStorage, LocalFileStorage>();*/
+builder.Services.AddHttpContextAccessor();//to access httpcontext in localfilestorage class and actorrepository class
+
 
 //swagger service
 builder.Services.AddEndpointsApiExplorer();
@@ -82,6 +82,8 @@ app.MapGroup("/actors").MapActors();//mapping actor endpoints with /actors prefi
 app.MapGet("/", () => "Movie section");
 
 //Middleware zone ends here
+
+
 
 app.Run();
 

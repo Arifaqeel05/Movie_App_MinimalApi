@@ -1,5 +1,6 @@
 ﻿using Dapper;
 using Microsoft.Data.SqlClient;
+using Movie_App_MinimalApi.DTOs;
 using Movie_App_MinimalApi.Entity;
 using System.Data;
 
@@ -8,10 +9,13 @@ namespace Movie_App_MinimalApi.Repositories
     public class ActorRepository : IActorRepository
     {
         private readonly string connectionString;
+        private readonly HttpContext httpContext;
+
         //constructor to get the connection string from appsettings.json.this is dependency injection.
-        public ActorRepository(IConfiguration config)
+        public ActorRepository(IConfiguration config,IHttpContextAccessor httpContextAccessor)
         {
             connectionString = config.GetConnectionString("DefaultConnection")!;
+            httpContext=httpContextAccessor.HttpContext!;
         }
 
         public async Task<int> Create(Actor actor)
@@ -33,12 +37,18 @@ namespace Movie_App_MinimalApi.Repositories
             }
         }
 
-        public async Task<List<Actor>> GetAll()
+        public async Task<List<Actor>> GetAll(PaginationDTO pagination)
         {
             using (var connection = new SqlConnection(connectionString))
             {
-                var query = "Actors_GetAll";
-                var actors = await connection.QueryAsync<Actor>(query, commandType: CommandType.StoredProcedure);
+                var query = "Actors_GetAll"; //we had modified stored procedure to accept pagination parameters
+                var actors = await connection.QueryAsync<Actor>(query,
+                    new { pagination.Page, pagination.RecordsPerPage },
+                    commandType: CommandType.StoredProcedure);
+                    var actorsCount= await connection.QueryAsync<int>("Actors_Count",commandType: CommandType.StoredProcedure);
+                //we will use the header of http response to send total count of records to client
+
+                httpContext.Response.Headers.Append("TotalAmountOfActors", actorsCount.ToString());
                 return actors.ToList();
             }
         }
