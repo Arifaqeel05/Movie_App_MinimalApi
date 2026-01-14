@@ -47,7 +47,7 @@ namespace Movie_App_MinimalApi.Repositories
                 var movies = await connection.QueryAsync<Movie>(query,
                 new { pagination.Page, pagination.RecordsPerPage },
                 commandType: CommandType.StoredProcedure);
-                var movieCount = await connection.QuerySingleAsync<int>("Movie_Count", commandType: CommandType.StoredProcedure);
+                var movieCount = await connection.QuerySingleAsync<int>("Movies_Count", commandType: CommandType.StoredProcedure);
                 //we will use the header of http response to send total count of records to client
 
                 httpContext.Response.Headers.Append("TotalAmountOfMoviea", movieCount.ToString());
@@ -58,7 +58,7 @@ namespace Movie_App_MinimalApi.Repositories
         {
             using (var connection = new SqlConnection(connectionString))
             {
-                var query = @"Movies_Exist";
+                var query = "Movies_Exist";
                 var parameter = new { Id = id };
                 var exists = await connection.ExecuteScalarAsync<bool>(query, parameter);
                 return exists;
