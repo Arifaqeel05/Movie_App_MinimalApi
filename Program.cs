@@ -23,7 +23,8 @@ builder.Services.AddCors(myCorsSetting =>
         //permissions is a parameter name, you can use any name
         //fetching allowed origin from appsettings.Develoment.json-->builder.Configuration["allowedOrigin"]!
         permissions
-                   .WithOrigins(builder.Configuration["allowedOrigin"]!)
+                   //.WithOrigins(builder.Configuration["allowedOrigin"]!)
+                   .AllowAnyOrigin()
                    .AllowAnyHeader()
                    .AllowAnyMethod();
     });
@@ -50,6 +51,8 @@ builder.Services.AddScoped<IMovieRepository, MovieRepository>();//dependency inj
 builder.Services.AddTransient<IFileStorage, AzureFileStorage>();
 /*local file storage service---we use azure so comment this
 builder.Services.AddTransient<IFileStorage, LocalFileStorage>();*/
+
+
 builder.Services.AddHttpContextAccessor();//to access httpcontext in localfilestorage class and actorrepository class
 
 
@@ -79,13 +82,10 @@ app.MapGroup("/genres")
                  //grouping the endpoints with common prefix /genres and adding tag for swagger documentation
 app.MapGroup("/actors").MapActors();//mapping actor endpoints with /actors prefix
 
-app.MapGet("/", () => "Movie section");
+app.MapGroup("/movies").MapMovies();
+    
 
 //Middleware zone ends here
-
-
-
 app.Run();
-
 
 //so in the development environment, we allowed all the origins to access our api

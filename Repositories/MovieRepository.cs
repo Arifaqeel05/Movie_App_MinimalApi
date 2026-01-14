@@ -12,7 +12,7 @@ namespace Movie_App_MinimalApi.Repositories
         private readonly string? connectionString;
         private readonly HttpContext httpContext;
 
-        public MovieRepository(IConfiguration configuration, HttpContextAccessor httpContextAccessor)
+        public MovieRepository(IConfiguration configuration, IHttpContextAccessor httpContextAccessor)
         {
             connectionString = configuration.GetConnectionString("DefaultConnection")!;
             httpContext = httpContextAccessor.HttpContext!;
