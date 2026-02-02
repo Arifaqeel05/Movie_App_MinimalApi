@@ -19,6 +19,7 @@ namespace Movie_App_MinimalApi.Endpoints
             group.MapGet("/{id:int}", GetById);
 
             group.MapPost("/createMovie", Create).DisableAntiforgery();
+            group.MapPut("/updateMovie/{id:int}", Update).DisableAntiforgery();
             return group;
         }
 
@@ -61,6 +62,30 @@ namespace Movie_App_MinimalApi.Endpoints
             await outputCacheStore.EvictByTagAsync("movies-get", default);//empty the cache with tag "movies-get",purpose of tag is to identify the cache entries related to movies
             var movieDTO=mapper.Map<MovieDTO>(movie);//map the movie entity to movieDTO to send in response
             return TypedResults.Created($"/movies/{id}", movieDTO);
+        }
+
+        static async Task<Results<NoContent, NotFound>>Update(int id, [FromForm] CreateMoviesDTO createMoviesDTO, IMovieRepository movieRepository
+            ,IFileStorage fileStorage, IOutputCacheStore outputCacheStore, IMapper mapper)
+        {
+            var checkMovieExist=await movieRepository.GetById(id);
+            if (checkMovieExist is null)
+            {
+                return TypedResults.NotFound();
+            }
+            var movieForUpdate=mapper.Map<Movie>(createMoviesDTO);//map the incoming dto to movie entity
+            movieForUpdate.Id=id;//set the id of movie entity to the id passed in url
+            movieForUpdate.Poster=checkMovieExist.Poster;//set the poster of movie entity to the existing poster in database
+            if (createMoviesDTO.Poster is not null)
+            {
+                var url=await fileStorage.Edit(containerName, createMoviesDTO.Poster, checkMovieExist.Poster);
+                //createMoviesDTO.Poster is the new poster file to be updated
+                //checkMovieExist.Poster is the existing poster url in database.
+                //in simple words, we are replacing the existing poster with the new poster
+                movieForUpdate.Poster=url;
+            }
+            await movieRepository.Update(movieForUpdate);
+            await outputCacheStore.EvictByTagAsync("movies-get", default);
+            return TypedResults.NoContent();
         }
     }
 }
