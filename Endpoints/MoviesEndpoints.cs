@@ -20,6 +20,7 @@ namespace Movie_App_MinimalApi.Endpoints
 
             group.MapPost("/createMovie", Create).DisableAntiforgery();
             group.MapPut("/updateMovie/{id:int}", Update).DisableAntiforgery();
+            group.MapDelete("/deleteMovie/{id:int}", Delete);
             return group;
         }
 
@@ -84,6 +85,19 @@ namespace Movie_App_MinimalApi.Endpoints
                 movieForUpdate.Poster=url;
             }
             await movieRepository.Update(movieForUpdate);
+            await outputCacheStore.EvictByTagAsync("movies-get", default);
+            return TypedResults.NoContent();
+        }
+        static async Task<Results<NoContent, NotFound>> Delete(int id, IMovieRepository movieRepository,
+            IFileStorage fileStorage, IOutputCacheStore outputCacheStore)
+        {
+            var movieExist=await movieRepository.GetById(id);
+            if (movieExist is null)
+            {
+                return TypedResults.NotFound();
+            }
+            await movieRepository.Delete(id);//goto repository or database and delete the movie with given id
+            await fileStorage.Delete(movieExist.Poster, containerName);//deleting the poster file from storage
             await outputCacheStore.EvictByTagAsync("movies-get", default);
             return TypedResults.NoContent();
         }
