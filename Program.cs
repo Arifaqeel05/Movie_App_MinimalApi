@@ -46,7 +46,7 @@ builder.Services.AddAutoMapper(typeof(Program)); //automapper service
 builder.Services.AddScoped<IGenreRepository, GenreRepository>(); //providing implementation of IGenreRepository interface with GenreRepository class
 builder.Services.AddScoped<IActorRepository, ActorRepository>();//dependency injection for ActorRepository
 builder.Services.AddScoped<IMovieRepository, MovieRepository>();//dependency injection for MovieRepository
-
+builder.Services.AddScoped<ICommentRepository, CommentRepository>();//dependency injection for CommentRepository
 //config azure service for image
 builder.Services.AddTransient<IFileStorage, AzureFileStorage>();
 /*local file storage service---we use azure so comment this
