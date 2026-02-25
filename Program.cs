@@ -83,7 +83,8 @@ app.MapGroup("/genres")
 app.MapGroup("/actors").MapActors();//mapping actor endpoints with /actors prefix
 
 app.MapGroup("/movies").MapMovies();
-    
+app.MapGroup("/movie/{movieId:int}/comment").MapCommentsEndpoints();
+
 
 //Middleware zone ends here
 app.Run();

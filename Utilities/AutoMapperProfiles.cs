@@ -17,6 +17,9 @@ namespace Movie_App_MinimalApi.Utilities
             CreateMap<Movie, MovieDTO>();
             CreateMap<CreateMoviesDTO, Movie>()
                 .ForMember(p => p.Poster, options => options.Ignore());
+            CreateMap<Comment, CommentDTO>();
+            CreateMap<CreateCommentDTO, Comment>();
+
         }
     }
 }
