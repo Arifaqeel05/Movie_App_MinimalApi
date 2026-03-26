@@ -21,6 +21,7 @@ namespace Movie_App_MinimalApi.Services
                 return;
             }
             var client = new BlobContainerClient(az_connectionString, container);
+            //to create an instance of blob container client to interact with the blob container in azure storage we have to provide connection string and container name to the constructor of blobcontainerclient
             await client.CreateIfNotExistsAsync();
             var fileName = Path.GetFileName(route);
             var blob = client.GetBlobClient(fileName);

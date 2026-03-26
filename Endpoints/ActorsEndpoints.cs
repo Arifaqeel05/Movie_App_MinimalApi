@@ -30,8 +30,12 @@ namespace Movie_App_MinimalApi.Endpoints
         }
 
 
-        static async Task<Ok<List<ActorDTO>>>GetAll(IActorRepository actorRepository, 
-            IMapper mapper, int page=1, int recordsPerPage=10) //we didn't use PaginationDTO here to keep it simple
+        /*Task<Ok<List<ActorDTO>>>-->this means that task is a asynchronous method that will return a result of type Ok<List<ActorDTO>>.Ok is a helper class
+        that represents a 200 OK response with a value of type List<ActorDTO> in the response body.*/
+        static async Task<Ok<List<ActorDTO>>>GetAll(
+            IActorRepository actorRepository,  
+            IMapper mapper, 
+            int page=1, int recordsPerPage=10) //we didn't use PaginationDTO here to keep it simple
         {
             //create instance of paginationDTO and now set its properties
             var pagination = new PaginationDTO{ Page = page, RecordsPerPage = recordsPerPage };
@@ -69,8 +73,7 @@ namespace Movie_App_MinimalApi.Endpoints
                                             IFileStorage fileStorage,//for file storage operations
                                             IOutputCacheStore cachecleanig, IMapper mapper)
         {
-            //THIS WILL CREATE A NEW Actor BASED ON THE DATA RECEIVED FROM THE CLIENT IN THE DTO and map to actor entity
-            var actor = mapper.Map<Actor>(creatupdaetactorDTO);
+            var actor = mapper.Map<Actor>(creatupdaetactorDTO);//here we are mapping the createUpdateActorDTO to actor entity,automapper will automatically map the properties with same name and type
 
             if (creatupdaetactorDTO.ActorPic is not null)
             {

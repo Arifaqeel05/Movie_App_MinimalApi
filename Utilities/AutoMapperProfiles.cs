@@ -4,12 +4,16 @@ using Movie_App_MinimalApi.Entity;
 
 namespace Movie_App_MinimalApi.Utilities
 {
+    //purpose of this class is to define the mapping(meaning which property of source type will be mapped to which property of destination type)
+    //between different objects(entities and dtos) using
+    //automapper(automapper is a library that helps us to map one object to another object
+    //without writing any code for it.we just have to define the mapping configuration in this class and automapper will take care of the rest).
     public class AutoMapperProfiles:Profile
     {
         //constructor to put all the automapping configurations
         public AutoMapperProfiles()
         {
-            CreateMap<Genre, GenreDTO>();
+            CreateMap<Genre, GenreDTO>(); //FIRST Parameter is the source type meaning the type we want to map from and the second parameter is the destination type meaning the type we want to map to.
             CreateMap<CreateUpdateGenreDTO, Genre>();
             CreateMap<Actor, ActorDTO>();
             CreateMap<CreateUpdateActorDTO, Actor>()

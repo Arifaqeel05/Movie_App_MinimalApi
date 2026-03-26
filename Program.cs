@@ -14,6 +14,9 @@ var builder = WebApplication.CreateBuilder(args);
 
 //service zone starts here
 
+//add database context service
+builder.Services.AddDbContext<ApplicationDbContext>(options =>
+    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
 //add cors service
 builder.Services.AddCors(myCorsSetting =>
