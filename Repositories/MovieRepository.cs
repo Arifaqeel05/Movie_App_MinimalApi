@@ -15,7 +15,8 @@ namespace Movie_App_MinimalApi.Repositories
         public MovieRepository(IConfiguration configuration, IHttpContextAccessor httpContextAccessor)
         {
             connectionString = configuration.GetConnectionString("DefaultConnection")!;
-            httpContext = httpContextAccessor.HttpContext!;
+            httpContext = httpContextAccessor.HttpContext!; //we will use this httpContext to set the header of http response to send total count of records to client when we get all movies with pagination.
+
         }
 
         public async Task<int> Create(Movie movie)
@@ -50,7 +51,7 @@ namespace Movie_App_MinimalApi.Repositories
                 var movieCount = await connection.QuerySingleAsync<int>("Movies_Count", commandType: CommandType.StoredProcedure);
                 //we will use the header of http response to send total count of records to client
 
-                httpContext.Response.Headers.Append("TotalAmountOfMoviea", movieCount.ToString());
+                httpContext.Response.Headers.Append("TotalAmountOfMovies", movieCount.ToString());
                 return movies.ToList();
             }
         }
@@ -60,7 +61,7 @@ namespace Movie_App_MinimalApi.Repositories
             {
                 var query = "Movies_Exist";
                 var parameter = new { Id = id };
-                var exists = await connection.ExecuteScalarAsync<bool>(query, parameter);
+                var exists = await connection.QuerySingleAsync<bool>(query, parameter);
                 return exists;
             }
         }
@@ -71,7 +72,7 @@ namespace Movie_App_MinimalApi.Repositories
             {
                 var query = "Movies_GetById";
                 var parameter = new { Id = id };
-                var movies = await connection.QuerySingleOrDefaultAsync<Movie>(query, parameter, commandType: CommandType.StoredProcedure);
+                var movies = await connection.QueryFirstOrDefaultAsync<Movie>(query, parameter, commandType: CommandType.StoredProcedure);
                 return movies;
             }
         }
