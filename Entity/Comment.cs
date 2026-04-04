@@ -4,6 +4,6 @@
     {
         public int Id { get; set; }
         public string Body { get; set; }=null!;
-        public int MovieId { get; set; }
+        public int MovieId { get; set; } //foreign key to the movie that the comment belongs to
     }
 }

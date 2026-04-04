@@ -14,7 +14,7 @@ namespace Movie_App_MinimalApi.Endpoints
             group.MapGet("/", GetAll).
                 CacheOutput(c => c.Expire(TimeSpan.FromSeconds(60)).
                 Tag("comment-get"));
-            group.MapGet("/{id:int}", GetById);
+            group.MapGet("/{id:int}", GetById).WithName("GetCommentById"); //here we are giving a name to the endpoint, so that we can use this name to generate the url for this endpoint in the response of the create method, when we return the created response with the location of the created comment
             group.MapPost("/", Create);
             group.MapPut("/{id:int}", UpdateComment);
             group.MapDelete("/{id:int}", DeleteComment);
@@ -33,7 +33,7 @@ namespace Movie_App_MinimalApi.Endpoints
             return TypedResults.Ok(commentsDTO);//returning the list of commentDTOs as the response
         }
 
-        static async Task<Results<Ok<CommentDTO>, NotFound>> GetById(int id, ICommentRepository commentRepository,
+        static async Task<Results<Ok<CommentDTO>, NotFound>> GetById(int id,int movieId, ICommentRepository commentRepository,
             IMovieRepository movieRepository, IMapper mapper)
         {
             if (!await movieRepository.IsExist(id))
@@ -50,7 +50,7 @@ namespace Movie_App_MinimalApi.Endpoints
         }
 
 
-        static async Task<Results<Created<CommentDTO>, NotFound>> Create(int movieId, CreateCommentDTO createCommentDTO,
+        static async Task<Results<CreatedAtRoute<CommentDTO>, NotFound>> Create(int movieId, CreateCommentDTO createCommentDTO,
             ICommentRepository commentRepository, IMovieRepository movieRepository, IMapper mapper,
             IOutputCacheStore outputCacheStore)
         {
@@ -68,7 +68,12 @@ namespace Movie_App_MinimalApi.Endpoints
             //this will create the comment in the database and return the id of the created comment
 
             var commentDTO = mapper.Map<CommentDTO>(comment);//mapping the created comment entity to commentDTO to return the response
-            return TypedResults.Created($"/comment/{id}", commentDTO);//returning the created response with the location of the created comment and the commentDTO as the response body
+            return TypedResults.CreatedAtRoute(commentDTO, "GetCommentById", new
+            {
+                id,
+                movieId
+
+            });//returning the created response with the location of the created comment and the commentDTO as the response body
         }
 
         static async Task<Results<NoContent, NotFound>> UpdateComment(int id, int movieId, CreateCommentDTO createCommentDTO,
