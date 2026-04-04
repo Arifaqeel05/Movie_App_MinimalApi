@@ -128,5 +128,28 @@ namespace Movie_App_MinimalApi.Repositories
             }
 
         }
+
+        public async Task Assign(int Id, List<int> genresIds)
+        {
+            //data table-->representation of in-memory table,
+            //we will use it to pass the list of genre ids to the stored procedure as a table-valued
+            //parameter
+
+            var dataTable = new DataTable();
+            dataTable.Columns.Add("Id", typeof(int));//adding a column named "Id" of type int to the data table
+
+            foreach (var genresId in genresIds)
+            {
+                dataTable.Rows.Add(genresId);
+                //adding a new row to the data table for each genre id in the list of genre id
+            }
+
+            using (var connection = new SqlConnection(connectionString))
+            {
+                await connection.ExecuteAsync("Movie_AssignGenre", 
+                    new{movieId=Id,genresIds=dataTable}
+                    );
+            }
+        }
     }
 }

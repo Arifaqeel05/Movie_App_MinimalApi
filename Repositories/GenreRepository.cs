@@ -139,5 +139,26 @@ namespace Movie_App_MinimalApi.Repositories
                 return genres.ToList();
             }
         }
+
+        public async Task<List<int>> Exists(List<int> Ids)
+        {
+            var dataTable = new DataTable();
+            dataTable.Columns.Add("Id", typeof(int));//adding a column named "Id" of type int to the data table
+
+            foreach (var genresId in Ids)
+            {
+                dataTable.Rows.Add(genresId);
+                //adding a new row to the data table for each genre id in the list of genre id
+            }
+
+            using (var connection = new SqlConnection(connectionString))
+            {
+                var IdOfGenresThatExists = await connection.QueryAsync<int>("Genres_GetBySeveralIds", 
+                    new { genresId = dataTable}, 
+                    commandType: CommandType.StoredProcedure);
+
+                return IdOfGenresThatExists.ToList();
+            }
+        }
     }
 }

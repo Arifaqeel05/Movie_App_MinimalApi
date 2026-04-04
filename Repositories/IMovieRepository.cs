@@ -5,6 +5,7 @@ namespace Movie_App_MinimalApi.Repositories
 {
     public interface IMovieRepository
     {
+        Task Assign(int Id, List<int> genresIds);
         Task<int> Create(Movie movie);
         Task Delete(int id);
         Task<List<Movie>> GetAll(PaginationDTO pagination);
