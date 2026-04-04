@@ -58,7 +58,8 @@ builder.Services.AddTransient<IFileStorage, LocalFileStorage>();*/
 
 builder.Services.AddHttpContextAccessor();//to access httpcontext in localfilestorage class and actorrepository class
 
-
+builder.Services.AddAuthentication();
+builder.Services.AddAuthorization();
 //swagger service
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
@@ -80,6 +81,9 @@ app.UseStaticFiles();
 
 app.UseCors(); //enable cors middleware with default policy.it will be applied globally 
 app.UseOutputCache();
+
+app.UseAuthentication();
+
 app.MapGroup("/genres")
     .MapGenres();//this is the same method we have created in GenresEndpoints class.this is extension method because we are extending the functionality of RouteGroupBuilder class.
                  //grouping the endpoints with common prefix /genres and adding tag for swagger documentation
