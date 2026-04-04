@@ -70,10 +70,24 @@ namespace Movie_App_MinimalApi.Repositories
         {
             using (var connection = new SqlConnection(connectionString))
             {
-                var query = "Movies_GetById";
-                var parameter = new { Id = id };
-                var movies = await connection.QueryFirstOrDefaultAsync<Movie>(query, parameter, commandType: CommandType.StoredProcedure);
-                return movies;
+                //var query = "Movies_GetById";
+                //var parameter = new { Id = id };
+                //var movies = await connection.QueryFirstOrDefaultAsync<Movie>(query, parameter, commandType: CommandType.StoredProcedure);
+                //return movies;
+
+                //as we have updated the stored procedure to return the movie with its comments,
+                //we will use the below code to get the movie with its comments.
+
+                using (var multi=await connection.QueryMultipleAsync("Movies_GetById", 
+                           new { Id = id }, commandType: CommandType.StoredProcedure))
+                {
+                    var movie = await multi.ReadFirstAsync<Movie>();
+                    var comments= await multi.ReadAsync<Comment>();
+                    
+                    movie.Comments= comments.ToList();
+
+                    return movie;
+                }
             }
         }
         public async Task Update(Movie movie)
