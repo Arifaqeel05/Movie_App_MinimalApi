@@ -108,6 +108,17 @@ namespace Movie_App_MinimalApi.Repositories
             }
         }
 
+        public async Task<bool> ExistGenre(int id,string name)
+        {
+            using (var connection = new SqlConnection(connectionString))
+            {
+                var query = "Genres_ExistByIdAndName";
+                var parameter = new { Name = name , Id=id};
+                var existGenre = await connection.QuerySingleAsync<bool>(query, parameter, commandType: CommandType.StoredProcedure);
+                return existGenre;
+            }
+        }
+
         public async Task Update(Genre genre)
         {
             using (var connection = new SqlConnection(connectionString))
