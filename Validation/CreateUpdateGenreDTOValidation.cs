@@ -27,7 +27,8 @@ namespace Movie_App_MinimalApi.Validation
                 .NotEmpty()
                 .WithMessage(ValidationUtilities.NonEmptyMessage)
                 .MaximumLength(50).WithMessage(ValidationUtilities.MaxLengthMessage)
-                .Must(FirstLetterIsUpperCase).WithMessage(ValidationUtilities.FirstLetterUpperCaseMessage)
+                .Must(ValidationUtilities.FirstLetterIsUpperCase)
+                .WithMessage(ValidationUtilities.FirstLetterUpperCaseMessage)
                 .MustAsync(async (name, _) =>
                 {
                     var exists = await repository.ExistGenre(id, name);
@@ -41,16 +42,6 @@ namespace Movie_App_MinimalApi.Validation
         }
         
 
-        //custom validation:
-        public bool FirstLetterIsUpperCase(string value)
-        {
-            if (String.IsNullOrWhiteSpace(value))
-            {
-                return true; // Let the NotEmpty rule handle this case
-            }
 
-            var firstLetter = value[0].ToString();
-            return firstLetter == firstLetter.ToUpper();
-        }
     }
 }
