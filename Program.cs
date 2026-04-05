@@ -1,4 +1,5 @@
 using AutoMapper;
+using FluentValidation;
 using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.OutputCaching;
@@ -56,10 +57,14 @@ builder.Services.AddTransient<IFileStorage, AzureFileStorage>();
 builder.Services.AddTransient<IFileStorage, LocalFileStorage>();*/
 
 
-builder.Services.AddHttpContextAccessor();//to access httpcontext in localfilestorage class and actorrepository class
+builder.Services.AddHttpContextAccessor();
+//to access httpcontext in localfilestorage class and actorrepository class
 
-builder.Services.AddAuthentication();
-builder.Services.AddAuthorization();
+builder.Services.AddValidatorsFromAssemblyContaining<Program>();
+//here we are configuring fluent validation to scan the assembly containing the Program class for any validators and register them with the dependency injection container.
+//so that we can use them in our endpoints for validating the incoming requests.
+
+
 //swagger service
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
@@ -82,7 +87,7 @@ app.UseStaticFiles();
 app.UseCors(); //enable cors middleware with default policy.it will be applied globally 
 app.UseOutputCache();
 
-app.UseAuthentication();
+
 
 app.MapGroup("/genres")
     .MapGenres();//this is the same method we have created in GenresEndpoints class.this is extension method because we are extending the functionality of RouteGroupBuilder class.

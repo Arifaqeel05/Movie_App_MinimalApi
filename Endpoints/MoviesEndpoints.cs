@@ -16,7 +16,8 @@ namespace Movie_App_MinimalApi.Endpoints
         public static RouteGroupBuilder MapMovies(this RouteGroupBuilder group)
         {
             group.MapGet("/", GetAll)
-                .CacheOutput(c => c.Expire(TimeSpan.FromSeconds(60)).Tag("movies-get"));
+                .CacheOutput(c => c.Expire(TimeSpan.FromSeconds(60))
+                    .Tag("movies-get"));
             group.MapGet("/{id:int}", GetById);
 
             group.MapPost("/createMovie", Create).DisableAntiforgery();
@@ -116,7 +117,7 @@ namespace Movie_App_MinimalApi.Endpoints
         }
 
 
-        static async Task<Results<NoContent, NotFound, BadRequest<string>>> AssignGenres
+        /*static async Task<Results<NoContent, NotFound, BadRequest<string>>> AssignGenres
         (int id, List<int> genreIds, IMovieRepository movieRepository,
             IGenreRepository genreRepository)
         {
@@ -132,7 +133,7 @@ namespace Movie_App_MinimalApi.Endpoints
             }
 
 
-        }
+        }*/
     }
 }
     

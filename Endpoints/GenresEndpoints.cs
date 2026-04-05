@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using FluentValidation;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.OutputCaching;
 using Movie_App_MinimalApi.DTOs;
@@ -12,7 +13,9 @@ namespace Movie_App_MinimalApi.Endpoints
         public static RouteGroupBuilder MapGenres(this RouteGroupBuilder group)
         {
             group.MapGet("/", GetAll)
-                    .CacheOutput(c => c.Expire(TimeSpan.FromSeconds(60)).Tag("genre-get"));
+                .CacheOutput(c => c.Expire(TimeSpan.FromSeconds(60))
+                    .Tag("genre-get"));
+                    
             // Cache the response for 60 seconds
             //tag is used to evict or clear the cache when data is changed.
 
@@ -120,10 +123,19 @@ namespace Movie_App_MinimalApi.Endpoints
 
 
         /*-------------------------------------CREATE START HERE--------------------------------------*/
-        static async Task<Created<GenreDTO>> Create(CreateUpdateGenreDTO creatupdaetgenreDTO,
+        static async Task<Results<Created<GenreDTO>,ValidationProblem>> Create(CreateUpdateGenreDTO creatupdaetgenreDTO,
                                                     IGenreRepository genreRepository,
-                                                    IOutputCacheStore cachecleanig,IMapper mapper)
+                                                    IOutputCacheStore cachecleanig,IMapper mapper,
+                                                    IValidator<CreateUpdateGenreDTO> validator )
+                                                    
         {
+            var validationResult = await validator.ValidateAsync(creatupdaetgenreDTO);
+            if (!validationResult.IsValid)
+            {
+                return TypedResults.ValidationProblem(validationResult.ToDictionary());
+            }
+
+
             //THIS WILL CREATE A NEW GENRE BASED ON THE DATA RECEIVED FROM THE CLIENT IN THE DTO
             var genre =mapper.Map<Genre>(creatupdaetgenreDTO);
             /* new Genre
