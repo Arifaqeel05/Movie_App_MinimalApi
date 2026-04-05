@@ -162,10 +162,17 @@ namespace Movie_App_MinimalApi.Endpoints
 
         /*-----------------------------------END--------------------------------------------------------*/
 
-        static async Task<Results<NoContent, NotFound>> Update(int id, CreateUpdateGenreDTO creatupdaetgenreDTO, 
+        static async Task<Results<NoContent, NotFound,ValidationProblem>> Update(int id, CreateUpdateGenreDTO creatupdaetgenreDTO, 
                                                                 IGenreRepository genreRepository, IOutputCacheStore cachecleanig,
-                                                                IMapper mapper)
+                                                                IMapper mapper, 
+                                                                IValidator<CreateUpdateGenreDTO> validator)
         {
+            var validationResult = await validator.ValidateAsync(creatupdaetgenreDTO);
+            if (!validationResult.IsValid)
+            {
+                return TypedResults.ValidationProblem(validationResult.ToDictionary());
+            }
+
             var existingGenre = await genreRepository.GetById(id);
             if (existingGenre is null)
             {
