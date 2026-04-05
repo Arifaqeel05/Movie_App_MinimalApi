@@ -25,9 +25,9 @@ namespace Movie_App_MinimalApi.Validation
 
             RuleFor(p => p.Name)
                 .NotEmpty()
-                .WithMessage("The field {PropertyName} is required ")
-                .MaximumLength(50).WithMessage("The field {PropertyName} must not exceed {MaxLength} characters")
-                .Must(FirstLetterIsUpperCase).WithMessage("The first letter of {PropertyName} must be uppercase")
+                .WithMessage(ValidationUtilities.NonEmptyMessage)
+                .MaximumLength(50).WithMessage(ValidationUtilities.MaxLengthMessage)
+                .Must(FirstLetterIsUpperCase).WithMessage(ValidationUtilities.FirstLetterUpperCaseMessage)
                 .MustAsync(async (name, _) =>
                 {
                     var exists = await repository.ExistGenre(id, name);
