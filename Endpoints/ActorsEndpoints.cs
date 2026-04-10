@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.OutputCaching;
 using Movie_App_MinimalApi.DTOs;
 using Movie_App_MinimalApi.Entity;
+using Movie_App_MinimalApi.Filters;
 using Movie_App_MinimalApi.Repositories;
 using Movie_App_MinimalApi.Services;
 using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
@@ -21,7 +22,7 @@ namespace Movie_App_MinimalApi.Endpoints
 
             group.MapGet("/", GetAll)
                 .CacheOutput(c => c.Expire(TimeSpan.FromSeconds(60)).Tag("actors-get"));
-            group.MapGet("/{id:int}", GetById);
+            group.MapGet("/{id:int}", GetById).AddEndpointFilter<TestFilter>();
             group.MapGet("/searchByName/{name}", GetByName);
                 
             group.MapPost("/createActor", Create).DisableAntiforgery();//disable antiforgery for testing in postman
@@ -48,7 +49,8 @@ namespace Movie_App_MinimalApi.Endpoints
             return TypedResults.Ok(actorsDTO);//return 200 ok response with list of actorDTOs in the response body
         }
 
-        static async Task<Results<Ok<ActorDTO>,NotFound>> GetById(int id ,IActorRepository actorRepository, 
+        static async Task<Results<Ok<ActorDTO>,NotFound>> GetById(int id ,
+            IActorRepository actorRepository, 
             IMapper mapper)
         {
             var actor = await actorRepository.GetById(id);//fetch actor by id from database
