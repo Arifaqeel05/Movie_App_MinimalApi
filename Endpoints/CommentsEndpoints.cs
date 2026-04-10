@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.OutputCaching;
 using Movie_App_MinimalApi.DTOs;
 using Movie_App_MinimalApi.Entity;
+using Movie_App_MinimalApi.Filters;
 using Movie_App_MinimalApi.Repositories;
 
 namespace Movie_App_MinimalApi.Endpoints
@@ -15,8 +16,8 @@ namespace Movie_App_MinimalApi.Endpoints
                 CacheOutput(c => c.Expire(TimeSpan.FromSeconds(60)).
                 Tag("comment-get"));
             group.MapGet("/{id:int}", GetById).WithName("GetCommentById"); //here we are giving a name to the endpoint, so that we can use this name to generate the url for this endpoint in the response of the create method, when we return the created response with the location of the created comment
-            group.MapPost("/", Create);
-            group.MapPut("/{id:int}", UpdateComment);
+            group.MapPost("/", Create).AddEndpointFilter<ValidationFilters<CreateCommentDTO>>();
+            group.MapPut("/{id:int}", UpdateComment).AddEndpointFilter<ValidationFilters<CreateCommentDTO>>();
             group.MapDelete("/{id:int}", DeleteComment);
             return group;
         }
