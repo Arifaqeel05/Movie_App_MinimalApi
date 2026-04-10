@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.OutputCaching;
 using Movie_App_MinimalApi.DTOs;
 using Movie_App_MinimalApi.Entity;
+using Movie_App_MinimalApi.Filters;
 using Movie_App_MinimalApi.Repositories;
 
 namespace Movie_App_MinimalApi.Endpoints
@@ -33,7 +34,7 @@ namespace Movie_App_MinimalApi.Endpoints
 
             group.MapGet("/searchByName/{name}", GetByName);
 
-            group.MapPost("/createGenre", Create);
+            group.MapPost("/createGenre", Create).AddEndpointFilter<ValidationFilters<CreateUpdateGenreDTO>>();
             /*async (Genre genre, IGenreRepository genreRepository, IOutputCacheStore cachecleanig) =>
             {
             await genreRepository.Create(genre);
@@ -42,7 +43,7 @@ namespace Movie_App_MinimalApi.Endpoints
             });*/
 
 
-            group.MapPut("/updateGenre/{id:int}", Update);
+            group.MapPut("/updateGenre/{id:int}", Update).AddEndpointFilter<ValidationFilters<CreateUpdateGenreDTO>>();
             /* async (int id,Genre genre, IGenreRepository genreRepository, IOutputCacheStore cachecleanig) =>
             {
             var existingGenre = await genreRepository.GetById(id);
@@ -125,15 +126,11 @@ namespace Movie_App_MinimalApi.Endpoints
         /*-------------------------------------CREATE START HERE--------------------------------------*/
         static async Task<Results<Created<GenreDTO>,ValidationProblem>> Create(CreateUpdateGenreDTO creatupdaetgenreDTO,
                                                     IGenreRepository genreRepository,
-                                                    IOutputCacheStore cachecleanig,IMapper mapper,
-                                                    IValidator<CreateUpdateGenreDTO> validator )
+                                                    IOutputCacheStore cachecleanig,IMapper mapper
+                                                     )
                                                     
         {
-            var validationResult = await validator.ValidateAsync(creatupdaetgenreDTO);
-            if (!validationResult.IsValid)
-            {
-                return TypedResults.ValidationProblem(validationResult.ToDictionary());
-            }
+
 
 
             //THIS WILL CREATE A NEW GENRE BASED ON THE DATA RECEIVED FROM THE CLIENT IN THE DTO

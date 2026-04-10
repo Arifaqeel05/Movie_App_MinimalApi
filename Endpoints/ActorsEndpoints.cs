@@ -22,11 +22,13 @@ namespace Movie_App_MinimalApi.Endpoints
 
             group.MapGet("/", GetAll)
                 .CacheOutput(c => c.Expire(TimeSpan.FromSeconds(60)).Tag("actors-get"));
-            group.MapGet("/{id:int}", GetById).AddEndpointFilter<TestFilter>();
+            group.MapGet("/{id:int}", GetById);
             group.MapGet("/searchByName/{name}", GetByName);
                 
-            group.MapPost("/createActor", Create).DisableAntiforgery();//disable antiforgery for testing in postman
-            group.MapPut("/updateActor/{id:int}", Update).DisableAntiforgery(); ;
+            group.MapPost("/createActor", Create).DisableAntiforgery()
+                    .AddEndpointFilter<ValidationFilters<CreateUpdateActorDTO>>();//disable antiforgery for testing in postman
+            group.MapPut("/updateActor/{id:int}", Update).DisableAntiforgery()
+                .AddEndpointFilter<ValidationFilters<CreateUpdateActorDTO>>(); ;
             group.MapDelete("/deleteActor/{id:int}", Delete);
             return group;
         }
@@ -74,16 +76,10 @@ namespace Movie_App_MinimalApi.Endpoints
                                             CreateUpdateActorDTO creatupdaetactorDTO,//data received from client
                                             IActorRepository actorRepository,//for database operations
                                             IFileStorage fileStorage,//for file storage operations
-                                            IOutputCacheStore cachecleanig, IMapper mapper,
-                                            IValidator<CreateUpdateActorDTO> validator
+                                            IOutputCacheStore cachecleanig, IMapper mapper
                                             )
         {
-            var validationResult= await validator.ValidateAsync(creatupdaetactorDTO);//validate the incoming data using fluent validation
-
-            if (!validationResult.IsValid)
-            {
-                return TypedResults.ValidationProblem(validationResult.ToDictionary());
-            }
+            
 
             var actor = mapper.Map<Actor>(creatupdaetactorDTO);//here we are mapping the createUpdateActorDTO to actor entity,automapper will automatically map the properties with same name and type
 
