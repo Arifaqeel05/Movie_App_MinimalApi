@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using FluentValidation;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.OutputCaching;
@@ -67,12 +68,21 @@ namespace Movie_App_MinimalApi.Endpoints
             return TypedResults.Ok(actorsDTO);//return 200 ok response with list of actorDTOs in the response body
         }
 
-        static async Task<Created<ActorDTO>> Create([FromForm] //use fromform to receive form data including file
+        static async Task<Results<Created<ActorDTO>,ValidationProblem>> Create([FromForm] //use fromform to receive form data including file
                                             CreateUpdateActorDTO creatupdaetactorDTO,//data received from client
                                             IActorRepository actorRepository,//for database operations
                                             IFileStorage fileStorage,//for file storage operations
-                                            IOutputCacheStore cachecleanig, IMapper mapper)
+                                            IOutputCacheStore cachecleanig, IMapper mapper,
+                                            IValidator<CreateUpdateActorDTO> validator
+                                            )
         {
+            var validationResult= await validator.ValidateAsync(creatupdaetactorDTO);//validate the incoming data using fluent validation
+
+            if (!validationResult.IsValid)
+            {
+                return TypedResults.ValidationProblem(validationResult.ToDictionary());
+            }
+
             var actor = mapper.Map<Actor>(creatupdaetactorDTO);//here we are mapping the createUpdateActorDTO to actor entity,automapper will automatically map the properties with same name and type
 
             if (creatupdaetactorDTO.ActorPic is not null)
